@@ -22,6 +22,11 @@ import { isDarkColorHex, isLightColorHex } from 'helpers/color';
 import { setAnnotationAttachments } from 'helpers/ReplyAttachmentManager';
 import { isMobile } from 'helpers/device';
 
+// SWG Custom components
+import SWGNoteSWGStatus from 'components/SWGNoteSWGStatus';
+import SWGNoteSWGType from 'components/SWGNoteSWGType';
+import SWGNoteSWGPanel from 'components/SWGNoteSWGPanel';
+
 import core from 'core';
 import { getDataWithKey, mapAnnotationToKey, annotationMapKeys } from 'constants/map';
 import Theme from 'constants/theme';
@@ -95,6 +100,17 @@ const NoteContent = ({
 
   const [attachments, setAttachments] = useState([]);
 
+  //set states
+
+  const [annotationSWGType, setAnnotationSWGType] = useState(annotation.getCustomData("SWGtype"));
+  const [annotationSWGStatus, setAnnotationSWGStatus] = useState(annotation.getCustomData("SWGstatus"));
+  const [annotationSWGNumber, setAnnotationSWGNumber] = useState(annotation.getCustomData("SWGnumber"));
+  const [annotationSWGdocumentName, setannotationSWGdocumentName] = useState(annotation.getCustomData("SWGdocumentName"));
+  const [annotationSWGexternalAnnot, setannotationSWGexternalAnnot] = useState("");
+  const [isExternalAnnotVisible, setIsExternalAnnotVisible] = useState(false)
+
+
+
   useEffect(() => {
     setAttachments(annotation.getAttachments());
   }, [annotation]);
@@ -115,6 +131,46 @@ const NoteContent = ({
       core.removeEventListener('annotationChanged', annotationChangedListener);
     };
   }, [annotation]);
+
+
+  useEffect(() => {
+    const onAnnotationChanged = () => {
+      setAnnotationSWGType( annotation.getCustomData("SWGtype"));
+      setAnnotationSWGStatus(annotation.getCustomData("SWGstatus"));
+      setAnnotationSWGNumber( annotation.getCustomData("SWGnumber"));
+      setannotationSWGdocumentName( annotation.getCustomData("SWGdocumentName") );
+      setannotationSWGexternalAnnot ( annotation.getCustomData("SWGexternalAnnot") );
+    };
+
+    core.addEventListener('annotationChanged', onAnnotationChanged);
+    return () => {
+      core.removeEventListener('annotationChanged', onAnnotationChanged);
+    };
+  }, [setAnnotationSWGType, setAnnotationSWGStatus, setAnnotationSWGNumber, setannotationSWGdocumentName, setannotationSWGexternalAnnot]); //setAnnotationSWGAnnotationCreationDate
+
+
+  const handleStatusChange = useCallback((status, type) => {
+    //set status and type
+    annotation.setCustomData("SWGstatus", status);
+    annotation.setCustomData("SWGtype", type);
+
+    //redraw annotation
+    const annotationManager = core.getAnnotationManager();
+    annotationManager.redrawAnnotation(annotation);
+    annotationManager.trigger('annotationChanged', [[annotation], 'modify', {}]);
+    core.selectAnnotation(annotation);
+
+
+    //change der type and status in NotePanel
+    setAnnotationSWGType(type);
+    setAnnotationSWGStatus(status);
+  }, [annotation]);
+
+  const handleModificationTypeChange = useCallback((annotationId, eventNotification) => {
+    const annotationManager = core.getAnnotationManager();
+    annotationManager.trigger('notificationChanged', [[annotationId], eventNotification, {}]);
+  }, [annotation]);
+
 
   useDidUpdate(() => {
     if (!isEditing) {
@@ -332,6 +388,15 @@ const NoteContent = ({
     clicked: isNonReplyNoteRead, // The top note content is read
     'modular-ui': customizableUI,
   });
+
+
+  let finalAnnotationSWGdocumentName = annotationSWGdocumentName
+    ? `Relevant: ${annotationSWGdocumentName.length > 15
+      ? `... ${annotationSWGdocumentName.slice(-15)}`
+      : annotationSWGdocumentName}`
+    : "";
+
+  let isSwgExternalAnnot = Boolean(annotationSWGexternalAnnot);
 
   const content = useMemo(
     () => {

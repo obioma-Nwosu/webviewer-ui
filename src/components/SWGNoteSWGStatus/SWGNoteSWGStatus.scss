@@ -1,0 +1,109 @@
+@import '../../constants/styles';
+
+.edit-state-ee {
+  display: flex;
+  flex-direction: row;
+  margin-top: 4px;
+}
+.swg-status-buttons {
+  display: inline-flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  margin-right: 4px;
+}
+.swg-status-buttons > * {
+  width: 86px;
+}
+
+.break {
+  flex-basis: 100%;
+  height: 0;
+}
+
+.swg-status-agree-button {
+  cursor: pointer;
+  flex-shrink: 0;
+  background: #00CCCC;
+  border-radius: 4px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  color: var(--primary-button-text);
+  padding: 0 13px;
+  margin: 4px;
+}
+
+.swg-status-disagree-button {
+  cursor: pointer;
+  flex-shrink: 0;
+  background: #ff5454;
+  border-radius: 4px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  color: var(--primary-button-text);
+  padding: 0 13px;
+  margin: 4px;
+}
+.swg-status-work-button {
+  cursor: pointer;
+  flex-shrink: 0;
+  background: #00CCCC;
+  border-radius: 4px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  color: var(--primary-button-text);
+  padding: 0 13px;
+  margin: 4px;
+}
+
+.swg-status-modification-button {
+  cursor: pointer;
+  flex-shrink: 0;
+  background:#002949;
+  border-radius: 4px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  color: var(--primary-button-text);
+  padding: 0 13px;
+  margin: 4px;
+}
+
+.swg-status-clarification-button {
+  cursor: pointer;
+  flex-shrink: 0;
+  background: #002949;
+  border-radius: 4px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  color: var(--primary-button-text);
+  padding: 0 13px;
+  margin: 4px;
+}
+.swg-status-change-type-button{
+  cursor: pointer;
+  flex-shrink: 0;
+  background: #737389;
+  border-radius: 4px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  color: var(--primary-button-text);
+  padding: 0 13px;
+  margin: 4px;
+}
