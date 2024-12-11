@@ -22,11 +22,6 @@ import { isDarkColorHex, isLightColorHex } from 'helpers/color';
 import { setAnnotationAttachments } from 'helpers/ReplyAttachmentManager';
 import { isMobile } from 'helpers/device';
 
-// SWG Custom components
-import SWGNoteSWGStatus from 'components/SWGNoteSWGStatus';
-import SWGNoteSWGType from 'components/SWGNoteSWGType';
-import SWGNoteSWGPanel from 'components/SWGNoteSWGPanel';
-
 import core from 'core';
 import { getDataWithKey, mapAnnotationToKey, annotationMapKeys } from 'constants/map';
 import Theme from 'constants/theme';
@@ -491,14 +486,26 @@ const NoteContent = ({
           showAnnotationNumbering={showAnnotationNumbering}
           timezone={timezone}
           isTrackedChange={isTrackedChange}
+
+          // SWG Custom Props
+          isSwgExternalAnnot={isSwgExternalAnnot}
+          annotationSWGdocumentName={annotationSWGdocumentName}
+          finalAnnotationSWGdocumentName={finalAnnotationSWGdocumentName}
+          annotationSWGType={annotationSWGType}
+          annotationSWGStatus={annotationSWGStatus}
+          handleStatusChange={handleStatusChange}
+          handleModificationTypeChange={handleModificationTypeChange}
+          annotationSWGNumber={annotationSWGNumber}
+          isExternalAnnotVisible={isExternalAnnotVisible}
+          annotationSWGexternalAnnot={annotationSWGexternalAnnot}
         />
       );
-    }, [icon, iconColor, annotation, language, noteDateFormat, isSelected, setIsEditing, notesShowLastUpdatedDate, isReply, isUnread, renderAuthorName, core.getDisplayAuthor(annotation['Author']), isNoteStateDisabled, isEditing, noteIndex, getLatestActivityDate(annotation), sortStrategy, handleMultiSelect, isMultiSelected, isMultiSelectMode, isGroupMember, timezone, isTrackedChange]
+    }, [icon, iconColor, annotation, language, noteDateFormat, isSelected, setIsEditing, notesShowLastUpdatedDate, isReply, isUnread, renderAuthorName, core.getDisplayAuthor(annotation['Author']), isNoteStateDisabled, isEditing, noteIndex, getLatestActivityDate(annotation), sortStrategy, handleMultiSelect, isMultiSelected, isMultiSelectMode, isGroupMember, timezone, isTrackedChange, isSwgExternalAnnot, annotationSWGdocumentName, finalAnnotationSWGdocumentName, annotationSWGType, annotationSWGStatus, handleStatusChange, handleModificationTypeChange, annotationSWGNumber, isExternalAnnotVisible, annotationSWGexternalAnnot]
   );
 
   return (
-    <div className={noteContentClass} onClick={handleNoteContentClicked}>
-      {header}
+    <div className={!isSwgExternalAnnot ? noteContentClass : isExternalAnnotVisible && noteContentClass} onClick={handleNoteContentClicked}>
+      {!isSwgExternalAnnot ? header : isExternalAnnotVisible && header}
       {textPreview}
       {content}
     </div>

@@ -21,6 +21,9 @@ import { OFFICE_EDITOR_TRACKED_CHANGE_KEY } from 'constants/officeEditor';
 import { COMMON_COLORS } from 'constants/commonColors';
 
 import './NoteHeader.scss';
+import SWGNoteSWGPanel from 'components/SWGNoteSWGPanel';
+import SWGNoteSWGType from 'components/SWGNoteSWGType';
+import SWGNoteSWGStatus from 'components/SWGNoteSWGStatus';
 
 const propTypes = {
   icon: PropTypes.string,
@@ -46,6 +49,16 @@ const propTypes = {
   isGroupMember: PropTypes.bool,
   showAnnotationNumbering: PropTypes.bool,
   isTrackedChange: PropTypes.bool,
+  isSwgExternalAnnot: PropTypes.bool,
+  annotationSWGdocumentName: PropTypes.string,
+  finalAnnotationSWGdocumentName: PropTypes.string,
+  annotationSWGType: PropTypes.string,
+  annotationSWGStatus: PropTypes.string,
+  handleStatusChange: PropTypes.func,
+  handleModificationTypeChange: PropTypes.func,
+  annotationSWGNumber: PropTypes.string,
+  isExternalAnnotVisible: PropTypes.bool,
+  annotationSWGexternalAnnot: PropTypes.string,
 };
 
 function NoteHeader(props) {
@@ -73,6 +86,18 @@ function NoteHeader(props) {
     showAnnotationNumbering,
     timezone,
     isTrackedChange,
+
+    // SWG Props
+    isSwgExternalAnnot,
+    annotationSWGdocumentName,
+    finalAnnotationSWGdocumentName,
+    annotationSWGType,
+    annotationSWGStatus,
+    handleStatusChange,
+    handleModificationTypeChange,
+    annotationSWGNumber,
+    isExternalAnnotVisible,
+    annotationSWGexternalAnnot
   } = props;
 
   const [t] = useTranslation();
@@ -114,90 +139,215 @@ function NoteHeader(props) {
   };
 
   return (
-    <div className={noteHeaderClass}>
-      {!isReply &&
-        <div className="type-icon-container">
-          {isUnread &&
-            <div className="unread-notification"></div>
-          }
-          <Icon className="type-icon" glyph={icon} color={color} fillColor={fillColor} />
-        </div>
-      }
-      <div className={authorAndDateClass}>
-        <div className="author-and-overflow">
-          <div className="author-and-time">
-            <div className="author">
-              {showAnnotationNumbering && annotationAssociatedNumber !== undefined &&
-                <span className="annotation-number">{annotationDisplayedAssociatedNumber}</span>
-              }
-              {renderAuthorName(annotation)}
-            </div>
-            <div className="date-and-num-replies">
-              <div className="date-and-time">
-                {noteDateAndTime}
-                {isGroupMember && ` (Page ${annotation.PageNumber})`}
+    <>
+      {
+        !isSwgExternalAnnot ?
+          <div className={noteHeaderClass}>
+            {!isReply &&
+              <div className="type-icon-container">
+                {isUnread &&
+                  <div className="unread-notification"></div>
+                }
+                <Icon className="type-icon" glyph={icon} color={color} fillColor={fillColor} />
               </div>
-              {numberOfReplies > 0 && !isSelected &&
-                <div className="num-replies-container">
-                  <Icon className="num-reply-icon" glyph='icon-chat-bubble' />
-                  <div className="num-replies">{numberOfReplies}</div>
-                </div>}
-            </div>
-          </div>
-          <div className="state-and-overflow">
-            {isMultiSelectMode && !isGroupMember && !isReply &&
-              <Choice
-                id={`note-multi-select-toggle_${annotation.Id}`}
-                aria-label={`${renderAuthorName(annotation)} ${t('option.notesPanel.toggleMultiSelect')}`}
-                checked={isMultiSelected}
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  handleMultiSelect(!isMultiSelected);
-                }}
-              />
             }
-            <NoteUnpostedCommentIndicator
-              annotationId={annotation.Id}
-              ariaLabel={`Unposted Comment, ${renderAuthorName(annotation)}, ${noteDateAndTime}`}
-            />
-            {!isNoteStateDisabled && !isReply && !isMultiSelectMode && !isGroupMember && !isTrackedChange &&
-              <NoteState
-                annotation={annotation}
+            <div className={authorAndDateClass}>
+              <div className="author-and-overflow">
+                <SWGNoteSWGPanel
+                  annotation={annotation}
+                />
+                <div className="author-and-time">
+                  <div className="author">
+                    {showAnnotationNumbering && annotationAssociatedNumber !== undefined &&
+                      <span className="annotation-number">{annotationDisplayedAssociatedNumber}</span>
+                    }
+                    {renderAuthorName(annotation)}
+                  </div>
+                  <div className="date-and-num-replies">
+                    <div className="date-and-time">
+                      {noteDateAndTime}
+                      {isGroupMember && ` (Page ${annotation.PageNumber})`}
+                      <p title={annotationSWGdocumentName}>
+                        {
+                          annotationSWGdocumentName === 'modification' ? finalAnnotationSWGdocumentName : ''
+                        }
+                      </p>
+                    </div>
+                    {numberOfReplies > 0 && !isSelected &&
+                      <div className="num-replies-container">
+                        <Icon className="num-reply-icon" glyph='icon-chat-bubble' />
+                        <div className="num-replies">{numberOfReplies}</div>
+                      </div>}
+                  </div>
+                </div>
+                <div className="state-and-overflow">
+                  {isMultiSelectMode && !isGroupMember && !isReply &&
+                    <Choice
+                      id={`note-multi-select-toggle_${annotation.Id}`}
+                      aria-label={`${renderAuthorName(annotation)} ${t('option.notesPanel.toggleMultiSelect')}`}
+                      checked={isMultiSelected}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleMultiSelect(!isMultiSelected);
+                      }}
+                    />
+                  }
+                  <NoteUnpostedCommentIndicator
+                    annotationId={annotation.Id}
+                    ariaLabel={`Unposted Comment, ${renderAuthorName(annotation)}, ${noteDateAndTime}`}
+                  />
+                  {!isNoteStateDisabled && !isReply && !isMultiSelectMode && !isGroupMember && !isTrackedChange &&
+                    <NoteState
+                      annotation={annotation}
+                      isSelected={isSelected}
+                    /> && <SWGNoteSWGType
+                      annotationSWGType={annotationSWGType}
+                      annotationSWGStatus={annotationSWGStatus}
+                      handleStatusChange={handleStatusChange}
+                      handleModificationTypeChange={handleModificationTypeChange}
+                      annotationId={annotation.Id}
+                      isSelected={isSelected}
+                    />
+                  }
+                  {!isEditing && isSelected && !isMultiSelectMode && !isGroupMember && !isTrackedChange &&
+                    <NotePopup
+                      noteIndex={noteIndex}
+                      annotation={annotation}
+                      setIsEditing={setIsEditing}
+                      isReply={isReply}
+                    />
+                  }
+                  {isSelected && isTrackedChange && !isMultiSelectMode &&
+                    <>
+                      <Button
+                        title={t('officeEditor.accept')}
+                        img={'icon-menu-checkmark'}
+                        className="tracked-change-icon-wrapper accept"
+                        onClick={() => acceptTrackedChange(annotation)}
+                        iconClassName="tracked-change-icon"
+                      />
+                      <Button
+                        title={t('officeEditor.reject')}
+                        img={'icon-close'}
+                        className="tracked-change-icon-wrapper reject"
+                        onClick={() => rejectTrackedChange(annotation)}
+                        iconClassName="tracked-change-icon"
+                      />
+                    </>
+                  }
+                </div>
+              </div>
+              {!isReply && <SWGNoteSWGStatus
+                annotationSWGType={annotationSWGType}
+                annotationSWGNumber={annotationSWGNumber}
+                annotationSWGStatus={annotationSWGStatus}
+                handleStatusChange={handleStatusChange}
+                handleModificationTypeChange={handleModificationTypeChange}
+                annotationId={annotation.Id}
                 isSelected={isSelected}
-              />
-            }
-            {!isEditing && isSelected && !isMultiSelectMode && !isGroupMember && !isTrackedChange &&
-              <NotePopup
-                noteIndex={noteIndex}
-                annotation={annotation}
-                setIsEditing={setIsEditing}
-                isReply={isReply}
-              />
-            }
-            {isSelected && isTrackedChange && !isMultiSelectMode &&
-              <>
-                <Button
-                  title={t('officeEditor.accept')}
-                  img={'icon-menu-checkmark'}
-                  className="tracked-change-icon-wrapper accept"
-                  onClick={() => acceptTrackedChange(annotation)}
-                  iconClassName="tracked-change-icon"
-                />
-                <Button
-                  title={t('officeEditor.reject')}
-                  img={'icon-close'}
-                  className="tracked-change-icon-wrapper reject"
-                  onClick={() => rejectTrackedChange(annotation)}
-                  iconClassName="tracked-change-icon"
-                />
-              </>
+              />}
+            </div>
+          </div> :
+          <div>
+            { isExternalAnnotVisible &&
+              <div className={noteHeaderClass}>
+                {!isReply &&
+                  <div className="type-icon-container">
+                    {isUnread &&
+                      <div className="unread-notification"></div>
+                    }
+                    <Icon className="type-icon" glyph={icon} color={color} fillColor={fillColor} />
+                  </div>
+                }
+                <div className={authorAndDateClass}>
+                  <div className="author-and-overflow">
+                    <SWGNoteSWGPanel
+                      annotation={annotation}
+                    />
+                    <div className="author-and-time">
+                      <div className="author">
+                        {showAnnotationNumbering && annotationAssociatedNumber !== undefined &&
+                          <span className="annotation-number">{annotationDisplayedAssociatedNumber}</span>
+                        }
+                        {renderAuthorName(annotation)}
+                      </div>
+                      <div className="date-and-num-replies">
+                        <div className="date-and-time">
+                          {noteDateAndTime}
+                          {isGroupMember && ` (Page ${annotation.PageNumber})`}
+                          <p title={annotationSWGexternalAnnot && t('swg.message.annotationSWGexternalAnnot')}>
+                            { //display text of External Annotation
+                              annotationSWGexternalAnnot ? 'Externe Annotation' : ''
+                            }
+                          </p>
+                        </div>
+                        {numberOfReplies > 0 && !isSelected &&
+                          <div className="num-replies-container">
+                            <Icon className="num-reply-icon" glyph="icon-chat-bubble" />
+                            <div className="num-replies">{numberOfReplies}</div>
+                          </div>}
+                      </div>
+                    </div>
+                    <div className="state-and-overflow">
+                      {isMultiSelectMode && !isGroupMember && !isReply &&
+                        <Choice
+                          id={`note-multi-select-toggle_${annotation.Id}`}
+                          aria-label={`${renderAuthorName(annotation)} ${t('option.notesPanel.toggleMultiSelect')}`}
+                          checked={isMultiSelected}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleMultiSelect(!isMultiSelected);
+                          }}
+                        />
+                      }
+                      <NoteUnpostedCommentIndicator
+                        annotationId={annotation.Id}
+                        ariaLabel={`Unposted Comment, ${renderAuthorName(annotation)}, ${noteDateAndTime}`}
+                      />
+                      {!isNoteStateDisabled && !isReply && !isMultiSelectMode && !isGroupMember && !isTrackedChange &&
+                        <NoteState
+                          annotation={annotation}
+                          isSelected={isSelected}
+                        />
+                      }
+                      {!isEditing && isSelected && !isMultiSelectMode && !isGroupMember && !isTrackedChange &&
+                        <NotePopup
+                          noteIndex={noteIndex}
+                          annotation={annotation}
+                          setIsEditing={setIsEditing}
+                          isReply={isReply}
+                        />
+                      }
+                      {isSelected && isTrackedChange && !isMultiSelectMode &&
+                        <>
+                          <Button
+                            title={t('officeEditor.accept')}
+                            img={'icon-menu-checkmark'}
+                            className="tracked-change-icon-wrapper accept"
+                            onClick={() => acceptTrackedChange(annotation)}
+                            iconClassName="tracked-change-icon"
+                          />
+                          <Button
+                            title={t('officeEditor.reject')}
+                            img={'icon-close'}
+                            className="tracked-change-icon-wrapper reject"
+                            onClick={() => rejectTrackedChange(annotation)}
+                            iconClassName="tracked-change-icon"
+                          />
+                        </>
+                      }
+                    </div>
+                  </div>
+                </div>
+              </div>
             }
           </div>
-        </div>
-      </div>
-    </div>
+      }
+    </>
   );
+
 }
 
 NoteHeader.propTypes = propTypes;

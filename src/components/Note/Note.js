@@ -120,6 +120,86 @@ const Note = ({
       resize();
     }
   });
+  useEffect(() => {
+    if (noteTransformFunction) {
+      const notesPanelElement = getRootNode().querySelectorAll('.NotesPanel')[0];
+      ids.current.forEach((id) => {
+        const child = notesPanelElement.querySelector(`[data-webviewer-custom-element=${id}]`);
+        if (child) {
+          child.parentNode.removeChild(child);
+        }
+      });
+
+      ids.current = [];
+
+      const state = {
+        annotation,
+        isSelected,
+      };
+
+      noteTransformFunction(containerRef.current, state, (...params) => {
+        const element = document.createElement(...params);
+        const id = `custom-element-${currId}`;
+        currId++;
+        ids.current.push(id);
+        element.setAttribute('data-webviewer-custom-element', id);
+        element.addEventListener('mousedown', (e) => {
+          e.stopPropagation();
+        });
+
+        return element;
+      });
+    }
+  });
+
+  useEffect(() => {
+    // If this is not a new one, rebuild the isEditing map
+    const pendingText = pendingEditTextMap[annotation.Id];
+    if (pendingText !== '' && isContentEditable && !isDocumentReadOnly) {
+      setIsEditing(true, 0);
+    }
+  }, [isDocumentReadOnly, isContentEditable, setIsEditing, annotation, isMultiSelectMode]);
+
+  useDidUpdate(() => {
+    if (isDocumentReadOnly || !isContentEditable) {
+      setIsEditing(false, 0);
+    }
+  }, [isDocumentReadOnly, isContentEditable, setIsEditing]);
+
+  const handleNoteClick = async (e) => {
+    // stop bubbling up otherwise the note will be closed
+    // due to annotation deselection
+    e && e.stopPropagation();
+
+    if (isMultiSelectMode) {
+      handleMultiSelect(!isMultiSelected);
+      return;
+    }
+    if (unreadAnnotationIdSet.has(annotation.Id)) {
+      dispatch(actions.setAnnotationReadState({ isRead: true, annotationId: annotation.Id }));
+    }
+
+    customNoteSelectionFunction && customNoteSelectionFunction(annotation);
+    if (!isSelected) {
+      core.deselectAllAnnotations(documentViewerKey);
+
+      // Need this delay to ensure all other event listeners fire before we open the line
+      setTimeout(() => dispatch(actions.openElement(DataElements.ANNOTATION_NOTE_CONNECTOR_LINE)), 300);
+    }
+    if (isInNotesPanel && !(isOfficeEditorMode && officeEditorEditMode === OfficeEditorEditMode.PREVIEW)) {
+      core.selectAnnotation(annotation, documentViewerKey);
+      setCurAnnotId(annotation.Id);
+      core.jumpToAnnotation(annotation, documentViewerKey);
+      if (!isRightClickAnnotationPopupEnabled) {
+        dispatch(actions.openElement(DataElements.ANNOTATION_POPUP));
+      }
+      if (isOfficeEditorMode) {
+        const trackedChangeId = annotation.getCustomData(OFFICE_EDITOR_TRACKED_CHANGE_KEY);
+        await core.getOfficeEditor().moveCursorToTrackedChange(trackedChangeId);
+        core.getOfficeEditor().freezeMainCursor();
+      }
+    }
+  };
 
   const hasUnreadReplies = unreadReplyIdSet.size > 0;
 
@@ -135,6 +215,60 @@ const Note = ({
     replies: true,
     hidden: !isSelected,
   });
+
+  useEffect(() => {
+    // Must also restore the isEdit for  any replies, in case someone was editing a
+    // reply when a comment was placed above
+    if (!isMultiSelectMode) {
+      replies.forEach((reply, index) => {
+        const pendingText = pendingEditTextMap[reply.Id];
+        if ((pendingText !== '' && typeof pendingText !== 'undefined') && isSelected) {
+          setIsEditing(true, 1 + index);
+        }
+      });
+    }
+  }, [isSelected, isMultiSelectMode]);
+
+  useEffect(() => {
+    if (isMultiSelectMode) {
+      setIsEditing(false, 0);
+    }
+  }, [isMultiSelectMode]);
+
+  const showReplyArea = !Object.values(isEditingMap).some((val) => val);
+
+  const handleReplyClicked = (reply) => {
+    // set clicked reply as read
+    if (unreadReplyIdSet.has(reply.Id)) {
+      dispatch(actions.setAnnotationReadState({ isRead: true, annotationId: reply.Id }));
+      core.getAnnotationManager(documentViewerKey).selectAnnotation(reply);
+    }
+  };
+
+  const markAllRepliesRead = () => {
+    // set all replies to read state if user starts to type in reply textarea
+    if (unreadReplyIdSet.size > 0) {
+      const repliesSetToRead = replies.filter((r) => unreadReplyIdSet.has(r.Id));
+      core.getAnnotationManager(documentViewerKey).selectAnnotations(repliesSetToRead);
+      repliesSetToRead.forEach((r) => dispatch(actions.setAnnotationReadState({ isRead: true, annotationId: r.Id })));
+    }
+  };
+
+  const setIsEditing = useCallback(
+    (isEditing, index) => {
+      setIsEditingMap((map) => ({
+        ...map,
+        [index]: isEditing,
+      }));
+    },
+    [setIsEditingMap],
+  );
+
+  const groupAnnotations = core.getGroupAnnotations(annotation, documentViewerKey);
+  const isGroup = groupAnnotations.length > 1;
+  const isTrackedChange = mapAnnotationToKey(annotation) === annotationMapKeys.TRACKED_CHANGE;
+  // apply unread reply style to replyArea if the last reply is unread
+  const lastReplyId = replies.length > 0 ? replies[replies.length - 1].Id : null;
 
   // Updated className to include swgStatus classes
   const combinedClassName = noteClass + " " + swgStatusOpen + " " + swgStatusWorked + " " + swgStatusDone;
