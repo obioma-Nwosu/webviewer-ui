@@ -36,7 +36,8 @@ function NotePopupContainer(props) {
   }, [annotation, setIsEditing, noteIndex]);
 
   const handleDelete = React.useCallback(() => {
-    core.deleteAnnotations([annotation, ...annotation.getGroupedChildren()], undefined, activeDocumentViewerKey);
+    core.getAnnotationManager(activeDocumentViewerKey).trigger('notificationChanged', [annotation], 'notification-delete', {});
+    //core.deleteAnnotations([annotation, ...annotation.getGroupedChildren()], undefined, activeDocumentViewerKey);
   }, [annotation]);
 
   const isEditable = canModifyContents;

@@ -353,12 +353,14 @@ const AnnotationPopupContainer = ({
     && !includesFormFieldAnnotation;
 
   const onGroupAnnotations = () => {
-    core.groupAnnotations(primaryAnnotation, selectedAnnotations, activeDocumentViewerKey);
+    core.getAnnotationManager(activeDocumentViewerKey).trigger('notificationChanged', [primaryAnnotation, selectedAnnotations], "notification-group", {});
+    //core.groupAnnotations(primaryAnnotation, selectedAnnotations, activeDocumentViewerKey);
   };
 
   const showUngroupButton = canUngroup;
 
   const onUngroupAnnotations = () => {
+    core.getAnnotationManager(activeDocumentViewerKey).trigger('notificationChanged', [selectedAnnotations], "notification-ungroup", {});
     core.ungroupAnnotations(selectedAnnotations, activeDocumentViewerKey);
   };
 
@@ -402,9 +404,11 @@ const AnnotationPopupContainer = ({
 
   const onDeleteAnnotation = () => {
     if (isFocusedAnnotationSelected) {
-      core.deleteAnnotations(core.getSelectedAnnotations(activeDocumentViewerKey), undefined, activeDocumentViewerKey);
+      core.getAnnotationManager(activeDocumentViewerKey).trigger('notificationChanged', core.getSelectedAnnotations(activeDocumentViewerKey)[0], 'notification-delete', {});
+      //core.deleteAnnotations(core.getSelectedAnnotations(activeDocumentViewerKey), undefined, activeDocumentViewerKey);
     } else {
-      core.deleteAnnotations([focusedAnnotation], undefined, activeDocumentViewerKey);
+      core.getAnnotationManager(activeDocumentViewerKey).trigger('notificationChanged', [focusedAnnotation], 'notification-delete', {});
+      //core.deleteAnnotations([focusedAnnotation], undefined, activeDocumentViewerKey);
     }
     closePopup();
   };

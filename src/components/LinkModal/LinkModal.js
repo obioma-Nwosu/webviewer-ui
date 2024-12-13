@@ -111,7 +111,8 @@ const LinkModal = ({ rightClickedAnnotation, setRightClickedAnnotation }) => {
       if (groupedAnnots.length > 1) {
         const linksToDelete = groupedAnnots.filter((annot) => annot instanceof window.Core.Annotations.Link);
         if (linksToDelete.length > 0) {
-          core.deleteAnnotations(linksToDelete, activeDocumentViewerKey);
+          core.getAnnotationManager(activeDocumentViewerKey).trigger('notificationChanged', linksToDelete, 'notification-delete6', {});
+          //core.deleteAnnotations(linksToDelete, activeDocumentViewerKey);
         }
       }
 

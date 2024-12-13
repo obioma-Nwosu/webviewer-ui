@@ -1,4 +1,23 @@
 {
+  "swg": {
+    "action": {
+      "agree": "CL to CN",
+      "close": "Close",
+      "clarifyToRevision": "clarify to revision",
+      "disagree": "Disagree",
+      "work": "In work",
+      "clarification": "Clarification",
+      "clarificationShow": "show",
+      "modification": "Notification"
+    },
+    "option": {
+      "type":{
+        "revision": "Revision",
+        "clarification": "Clarification",
+        "modification": "Modification"
+      }
+    }
+  },
   "action": {
     "addParagraph": "Add Paragraph",
     "add": "Add",

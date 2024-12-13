@@ -1,4 +1,23 @@
 {
+  "swg": {
+    "action": {
+      "agree": "KL zu ÄM",
+      "clarifyToRevision": "KL zu Rev",
+      "close": "KL absch",
+      "disagree": "ablehnen",
+      "work": "KL bearbeiten",
+      "clarification": "KL",
+      "clarificationShow": "",
+      "modification": "ÄM"
+    },
+    "option": {
+      "type":{
+        "revision": "Revision",
+        "clarification": "Klärung",
+        "modification": "Änderung"
+      }
+    }
+  },
   "action": {
     "addParagraph": "Absatz hinzufügen",
     "add": "Hinzufügen",

@@ -75,6 +75,7 @@ const NoteContent = ({
   const activeTheme = useSelector((state) => selectors.getActiveTheme(state));
   const timezone = useSelector((state) => selectors.getTimezone(state));
   const customizableUI = useSelector((state) => selectors.getFeatureFlags(state)?.customizableUI);
+  const  activeDocumentViewerKey = useSelector((state) => selectors.getActiveDocumentViewerKey(state));
 
   const {
     isSelected,
@@ -150,7 +151,7 @@ const NoteContent = ({
     annotation.setCustomData("SWGtype", type);
 
     //redraw annotation
-    const annotationManager = core.getAnnotationManager();
+    const annotationManager = core.getAnnotationManager(activeDocumentViewerKey);
     annotationManager.redrawAnnotation(annotation);
     annotationManager.trigger('annotationChanged', [[annotation], 'modify', {}]);
     core.selectAnnotation(annotation);
@@ -162,7 +163,7 @@ const NoteContent = ({
   }, [annotation]);
 
   const handleModificationTypeChange = useCallback((annotationId, eventNotification) => {
-    const annotationManager = core.getAnnotationManager();
+    const annotationManager = core.getAnnotationManager(activeDocumentViewerKey);
     annotationManager.trigger('notificationChanged', [[annotationId], eventNotification, {}]);
   }, [annotation]);
 

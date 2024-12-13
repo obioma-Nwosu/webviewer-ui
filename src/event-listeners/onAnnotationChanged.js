@@ -19,6 +19,7 @@ export default (documentViewerKey) => (annotations, action, info) => {
 
 const deleteReplies = (annotations, documentViewerKey, info) => {
   annotations.forEach((annotation) => {
-    core.deleteAnnotations(annotation.getReplies(), { 'imported': false, 'force': true, 'isUndoRedo': info?.isUndoRedo }, documentViewerKey);
+    core.getAnnotationManager(documentViewerKey).trigger('notificationChanged', [annotation.getReplies()], "notification-delete-replies", {});
+    //core.deleteAnnotations(annotation.getReplies(), { 'imported': false, 'force': true, 'isUndoRedo': info?.isUndoRedo }, documentViewerKey);
   });
 };
