@@ -130,16 +130,21 @@ const NoteContent = ({
 
 
   useEffect(() => {
+    let isMounted = true;
     const onAnnotationChanged = () => {
-      setAnnotationSWGType( annotation.getCustomData("SWGtype"));
-      setAnnotationSWGStatus(annotation.getCustomData("SWGstatus"));
-      setAnnotationSWGNumber( annotation.getCustomData("SWGnumber"));
-      setannotationSWGdocumentName( annotation.getCustomData("SWGdocumentName") );
-      setannotationSWGexternalAnnot ( annotation.getCustomData("SWGexternalAnnot") );
+      if (isMounted) {
+        setAnnotationSWGStatus(annotation.getCustomData("SWGstatus"));
+        setAnnotationSWGType( annotation.getCustomData("SWGtype"));
+        setAnnotationSWGNumber( annotation.getCustomData("SWGnumber"));
+        setannotationSWGdocumentName( annotation.getCustomData("SWGdocumentName") );
+        setannotationSWGexternalAnnot ( annotation.getCustomData("SWGexternalAnnot") );
+
+      }
     };
 
     core.addEventListener('annotationChanged', onAnnotationChanged);
     return () => {
+      isMounted = false;
       core.removeEventListener('annotationChanged', onAnnotationChanged);
     };
   }, [setAnnotationSWGType, setAnnotationSWGStatus, setAnnotationSWGNumber, setannotationSWGdocumentName, setannotationSWGexternalAnnot]); //setAnnotationSWGAnnotationCreationDate
